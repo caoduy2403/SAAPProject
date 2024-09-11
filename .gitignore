@@ -1,0 +1,18 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/SAAPHelper/obj/Debug
+/FileHelper/obj/Debug
+/.vs/SAAPSolution/v17/.suo
+/.vs/SAAPSolution/FileContentIndex/0e9cbced-baf0-461b-8509-02c715f9a4b9.vsidx
+/.vs/SAAPSolution/FileContentIndex/138f9d35-5ec6-4b1a-99ee-b7f7d54db43f.vsidx
+/.vs/SAAPSolution/FileContentIndex/1e7022a9-4dbb-4297-b889-c23cc022404a.vsidx
+/.vs/SAAPSolution/FileContentIndex/5fc188d3-2e08-4d20-b2c5-1b487a11e42b.vsidx
+/.vs/SAAPSolution/FileContentIndex/a9c6b9ba-f4e2-49af-a543-23a3342af703.vsidx
+/.vs/SAAPSolution/FileContentIndex/aebf9dca-f0e2-4095-b5ce-d6039a979fc4.vsidx
+/.vs/SAAPSolution/FileContentIndex/ce8f203a-a790-4a74-8282-42e08bb927f7.vsidx
+/SAAPHelper/bin/Debug
+/packages
+/FileHelper/bin/Debug
+/.vs/SAAPSolution/v17/DocumentLayout.json
