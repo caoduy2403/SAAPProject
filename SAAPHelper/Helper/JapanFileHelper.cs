@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using SAAPHelper.Models;
+using DocumentFormat.OpenXml.Office2010.Excel;
 
 namespace SAAPHelper.Helper
 {
@@ -94,8 +95,8 @@ namespace SAAPHelper.Helper
                                             {
                                                 //Add data to Export
                                                 transText = TranslateHelper.TranslateText(sub_text);
-                                                dataExcelModel.Variable = CharactersHelper.FirstCharacterOfEachWordWithVarible(transText);
-                                                dataExcelModel.Message = CharactersHelper.FirstCharacterOfEachWordWithMessage(transText);
+                                                dataExcelModel.Variable = CharactersHelper.CapitalizeFirstLetterWithVarible(transText);
+                                                dataExcelModel.Message = CharactersHelper.CapitalizeFirstLetterWithMessage(transText);
                                             }
                                          
                                             dataExcelModel.No = No;
@@ -233,26 +234,31 @@ namespace SAAPHelper.Helper
 
         }
 
+        public static string GetConversionFileName(string id, string form_name,string file_name)
+        {
+            string result = id + "." + form_name + file_name + ExtensionFile.TEXT;
+            return result;
+        }
+
         public static void ConvertComment()
         {
             Console.WriteLine("[ConvertComment] - getSAAPConversion");
             DataTable dtConversion = getSAAPConversion();
 
-            string ext = ".txt";
-
             foreach (DataRow drConver in dtConversion.Rows)
             {
+                string id = drConver["id"].ToString();
                 string form_name = drConver["form_name"].ToString();
                 string before_source = drConver["Before_source"].ToString();
                 string After_source = drConver["After_source"].ToString();
 
                
                 string transText = TranslateHelper.TranslateText(form_name);
-                form_name = CharactersHelper.FirstCharacterOfEachWord(transText);
+                form_name = CharactersHelper.CapitalizeFirstLetter(transText);
 
                 #region Before Name
                 //Before Name
-                string beforeName = form_name + "BeforeName" + ext;
+                string beforeName = GetConversionFileName(id, form_name, "BeforeName");
                 string outBeforeName = Path.Combine(Constants.pathFolder, beforeName);
 
                 if (File.Exists(outBeforeName))
@@ -268,30 +274,30 @@ namespace SAAPHelper.Helper
                 #endregion
 
                 #region After Name
-                ////After Name
-                //string afterName = form_name + "AfterName" + ext;
-                //string outAfterName = Path.Combine(Constants.pathFolder, afterName);
+                //After Name
+                string afterName = GetConversionFileName(id, form_name, "AfterName");
+                string outAfterName = Path.Combine(Constants.pathFolder, afterName);
 
-                //if (File.Exists(outAfterName))
-                //{
-                //    File.Delete(outAfterName);
-                //}
+                if (File.Exists(outAfterName))
+                {
+                    File.Delete(outAfterName);
+                }
 
-                //using (StreamWriter writerAfterName = new StreamWriter(outAfterName))
-                //{
-                    
-                //    writerAfterName.WriteLine(After_source);
-                //} 
+                using (StreamWriter writerAfterName = new StreamWriter(outAfterName))
+                {
+
+                    writerAfterName.WriteLine(After_source);
+                }
                 #endregion
 
                 string filename = Path.GetFileName(form_name);
-                string OutputFile = filename + Constants.CommentName + ext;
+                string OutputFile = GetConversionFileName(id, filename, Constants.CommentName);
 
                 // Create a Regex
                 Regex rg = new Regex(Constants.pattern);
 
-                string[] arrBefore = before_source.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
-                string[] fileContents = After_source.Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
+                string[] arrBefore = before_source.Split(new string[] { Environment.NewLine,"\n" }, StringSplitOptions.None);
+                string[] fileContents = After_source.Split(new string[] { Environment.NewLine, "\n" }, StringSplitOptions.None);
                 string outFile = Path.Combine(Constants.pathFolder, OutputFile);
 
                 if (File.Exists(outFile))
@@ -308,21 +314,23 @@ namespace SAAPHelper.Helper
                        
                         Console.WriteLine("[ConvertComment] - [File Name] {0} [Line Code] {1}\n", filename, LineCode);
 
-                        if (line.Contains("lngWinINet"))
-                        {
-                            bool val = true;
-                        }
+                        //if (line.Contains("lngWinINet"))
+                        //{
+                        //    bool val = true;
+                        //}
 
                         string txtConvert = string.Empty;
+                        string txtBefore = string.Empty;
+                        
                         txtConvert = line;
-                        string txtBefore = arrBefore[LineCode];
+                        txtBefore = arrBefore[LineCode];
 
 
                         int IdxCmt = FuncHelper.GetStartIdxCommented(line);
                         int IdxBefore = FuncHelper.GetStartIdxCommented(txtBefore);
 
-
-                        if (IdxCmt != -1 && IdxBefore !=-1)
+                        //&& IdxBefore !=-1
+                        if (IdxCmt != -1 )
                         {
                            
 
@@ -383,8 +391,9 @@ namespace SAAPHelper.Helper
             sql = sql + "       ,[After_source] ";
             sql = sql + " FROM [dbo].[ANAME_conversion] ";
             sql = sql + " Where ISnull(After_source,N'') != N'' ";
-            //sql = sql + " And [ID] IN (1,2,3,4,5,6,7,8,13,14,15) ";
-            sql = sql + " And [ID] IN (22) ";
+            //sql = sql + " And [ID] > 22 ";
+            sql = sql + " And [ID] IN (11,22) ";
+            // sql = sql + " And [ID] IN (1,2,3,4,5,8,9,10,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27) ";
             sql = sql + " OrDer By [ID] ";
 
             dtResult = DbCommand.ExecuteDataTableWithCommand(sql);

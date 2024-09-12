@@ -57,8 +57,8 @@ namespace FileHelper
 
             //foreach (string str in arrayString)
             //{
-            //    string message = FirstCharacterOfEachWordWithMessage(str);
-            //    string varible = FirstCharacterOfEachWordWithVarible(str);
+            //    string message = CapitalizeFirstLetterWithMessage(str);
+            //    string varible = CapitalizeFirstLetterWithVarible(str);
 
                 //    Console.WriteLine("Message {0} \nVarible {1} \n", message, varible);
                 //}
@@ -139,21 +139,21 @@ namespace FileHelper
         public static readonly string Colons = ":";
         public static readonly string SemiColons = ";";
 
-        public static string FirstCharacterOfEachWord(string inputString, string separator)
+        public static string CapitalizeFirstLetter(string inputString, string separator)
         {
             // Split the input string into words, capitalize the first character of each word, and join them back into a string
             return string.Join(separator.ToString(), inputString.Split(' ').Select(word => char.ToUpper(word[0]) + word.Substring(1)));
         }
 
-        public static string FirstCharacterOfEachWordWithMessage(string inputString)
+        public static string CapitalizeFirstLetterWithMessage(string inputString)
         {
             // Split the input string into words, capitalize the first character of each word, and join them back into a string
-            //return FirstCharacterOfEachWord(inputString, Separator.Space);
+            //return CapitalizeFirstLetter(inputString, Separator.Space);
             return string.Join(" ", inputString.Split(' ').Select(word => char.ToUpper(word[0]) + word.Substring(1)));
         }
 
 
-        public static string FirstCharacterOfEachWordWithVarible(string inputString)
+        public static string CapitalizeFirstLetterWithVarible(string inputString)
         {
             string[] arrayString = inputString.Trim().Split(' ');
             if (arrayString.Length < 2)

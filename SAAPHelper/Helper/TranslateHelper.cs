@@ -58,8 +58,8 @@ namespace SAAPHelper.Helper
                             //Regex reg = new Regex("[*'\",_&#^@:]");
                             //result = reg.Replace(result, string.Empty);
 
-                            Regex rgx = new Regex("[^a-zA-Z -]");
-                            result = rgx.Replace(result,string.Empty);
+                            Regex rgx = new Regex("[^a-zA-Z1-9 -]");
+                            result = rgx.Replace(result, string.Empty).Trim();
 
                             return result;
                         }

@@ -18,9 +18,14 @@ namespace SAAPHelper.Helper
         {
             try
             {
+                if (list == null || list.Count < 1)
+                {
+                    Console.WriteLine("ExcelHelper.SaveAs DataExcelModel");
+                    return;
+                }
+
                 string fileName = String.Empty;
-                string[] text = pFileName.Split('-');
-                fileName = text[0];
+                fileName = pFileName.Replace('-', '_');
 
                 XLWorkbook workbook = new XLWorkbook();
                 DataTable dt = list.ToDataTable();

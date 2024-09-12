@@ -11,7 +11,7 @@ namespace SAAPHelper.Constant
         public const string pathFolder = "C:\\Users\\AZIP\\Desktop\\SAAPLibrary";
         public const string OutputName = "Output";
         public const string ConvertName = "V1";
-        public const string CommentName = "Cmt1";
+        public const string CommentName = "CmtV1";
         /// <summary>
         /// regex to check japanese
         /// </summary>
@@ -22,6 +22,14 @@ namespace SAAPHelper.Constant
         /// </summary>
         public static char[] delimiterChars = { ' ', ',', '.', ':', '(', ')', '{', '}', '=', '!', ',', '[', ']', '「', '」', '↑', '↓', '%', '）', '（', '<', '>', '：', '\'', '】', '【', '『', '』' };
         public static readonly string[] _redFlag = { "ﾃｷｽﾄ", "テキスト", "ｴﾗｰ", "エラー" };
+    }
+
+    public class ExtensionFile
+    {
+        /// <summary>
+        /// Text
+        /// </summary>
+        public static readonly string TEXT = ".txt";
     }
 
     public class Separator

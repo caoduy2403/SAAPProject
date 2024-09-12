@@ -13,7 +13,7 @@ namespace SAAPHelper.Helper
         /// </summary>
         /// <param name="inputString"></param>
         /// <returns></returns>
-        public static string FirstCharacterOfEachWord(string inputString)
+        public static string CapitalizeFirstLetter(string inputString)
         {
             // Split the input string into words, capitalize the first character of each word, and join them back into a string
             return string.Join(" ", inputString.Split(' ').Select(word => char.ToUpper(word[0]) + word.Substring(1)));
