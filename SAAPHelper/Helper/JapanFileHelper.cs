@@ -179,9 +179,10 @@ namespace SAAPHelper.Helper
                                 IsReplaced = true;
                             }
 
-                            //Convert To Half Width
-                            bool isHalf = JapanCharactersHandler.IsContainedHalfWidth(txtConvert);
-                            bool IsRedWord = Constants._redFlag.Contains(before_name);
+                            #region Convert To Half Width
+                            ////Convert To Half Width
+                            //bool isHalf = JapanCharactersHandler.IsContainedHalfWidth(txtConvert);
+                            //bool IsRedWord = Constants._redFlag.Contains(before_name);
 
                             if (!IsReplaced || IsRedWord)
                             {
