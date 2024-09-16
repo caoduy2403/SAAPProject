@@ -45,5 +45,6 @@ namespace SAAPHelper.Constant
         public static readonly string Exclamation = "!";
         public static readonly string Colons = ":";
         public static readonly string SemiColons = ";";
+        public static readonly string DoubleQuotes = "\"";
     }
 }

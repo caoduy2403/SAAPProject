@@ -40,11 +40,12 @@ namespace SAAPHelper.Helper
                 List<DataExcelModel> dataExcel = new List<DataExcelModel>();
                 int LineCode = 0;
                 int No = 1;
+                DateTime StartTime = DateTime.Now;
 
                 foreach (string line in fileContents)
                 {
                     LineCode++;
-                    Console.WriteLine("[GetJapaneseTextFile] - [File Name] {0} [Line Code] #{1}\n", filename, LineCode);
+                    Console.WriteLine("[GetJapaneseTextFile] - [File Name] {0} [Line Code] #{1} [TimeSpan] {2}\n", filename, LineCode, (DateTime.Now - StartTime));
 
                     if(FuncHelper.chkTextIsNotCommented(line))
                     {
@@ -69,6 +70,8 @@ namespace SAAPHelper.Helper
                                 {
                                     string sub_text = subline.Trim();
                                     int IdxSubcmt = line.IndexOf(sub_text);
+                                    sub_text = sub_text.Replace("\"'","");
+                                    sub_text = sub_text.Replace("' \"","");
                                     sub_text = sub_text.Replace("\"", "");
 
                                     //check in database
@@ -171,11 +174,24 @@ namespace SAAPHelper.Helper
                             string after_name = dr["after_name"].ToString();
                             bool IsReplaced = false;
 
-                            int idxSubtext = line.IndexOf(before_name);
+                            bool isHalfConvertString = JapanCharactersHandler.IsContainedHalfWidth(txtConvert);
+                            if (isHalfConvertString)
+                            {
+                                txtConvert = JapanCharactersHandler.ConvertHalfToFull(txtConvert);
+                            }
+
+                            bool isHalfBeforeName = JapanCharactersHandler.IsContainedHalfWidth(before_name);
+                            if (isHalfBeforeName)
+                            {
+                                before_name = JapanCharactersHandler.ConvertHalfToFull(before_name);
+                            }
+
+                            int idxSubtext = line.IndexOf(before_name, StringComparison.OrdinalIgnoreCase);
 
                             if ((IdxCmt == -1 || (IdxCmt > idxSubtext)) && idxSubtext > -1)
                             {
-                                txtConvert = txtConvert.Replace(before_name, after_name);
+                                Regex.Replace(txtConvert, before_name, after_name, RegexOptions.IgnoreCase);
+                                //txtConvert = txtConvert.Replace(before_name, after_name);
                                 IsReplaced = true;
                             }
 
@@ -184,40 +200,41 @@ namespace SAAPHelper.Helper
                             //bool isHalf = JapanCharactersHandler.IsContainedHalfWidth(txtConvert);
                             //bool IsRedWord = Constants._redFlag.Contains(before_name);
 
-                            if (!IsReplaced || IsRedWord)
-                            {
-                                bool bConvert_before_name = false;
-                                bool isHalfbefore_name = JapanCharactersHandler.IsContainedHalfWidth(before_name);
+                            //if (!IsReplaced || IsRedWord)
+                            //{
+                            //    bool bConvert_before_name = false;
+                            //    bool isHalfbefore_name = JapanCharactersHandler.IsContainedHalfWidth(before_name);
 
-                                //check half width text
-                                if (isHalfbefore_name)
-                                {
-                                    string full_before_name = JapanCharactersHandler.ConvertHalfToFull(before_name);
-                                    int idxFull = line.IndexOf(full_before_name);
+                            //    //check half width text
+                            //    if (isHalfbefore_name)
+                            //    {
+                            //        string full_before_name = JapanCharactersHandler.ConvertHalfToFull(before_name);
+                            //        int idxFull = line.IndexOf(full_before_name);
 
-                                    if ((IdxCmt == -1 || IdxCmt > idxFull) && idxFull > -1)
-                                    {
-                                        txtConvert = txtConvert.Replace(full_before_name, after_name);
-                                        bConvert_before_name = true;
-                                    }
-                                }
+                            //        if ((IdxCmt == -1 || IdxCmt > idxFull) && idxFull > -1)
+                            //        {
+                            //            txtConvert = txtConvert.Replace(full_before_name, after_name);
+                            //            bConvert_before_name = true;
+                            //        }
+                            //    }
 
-                                if (!bConvert_before_name)
-                                {
-                                    string convert_before_name = JapanCharactersHandler.ConvertFulToHalf(before_name);
-                                    int idxSubConvert = line.IndexOf(convert_before_name);
+                            //    if (!bConvert_before_name)
+                            //    {
+                            //        string convert_before_name = JapanCharactersHandler.ConvertFullToHalf(before_name);
+                            //        int idxSubConvert = line.IndexOf(convert_before_name);
 
-                                    if (isHalf)
-                                    {
-                                        if ((IdxCmt == -1 || IdxCmt > idxSubConvert) && idxSubConvert > -1)
-                                        {
-                                            txtConvert = txtConvert.Replace(convert_before_name, after_name);
-                                        }
-                                    }
-                                }
-                            }
+                            //        if (isHalf)
+                            //        {
+                            //            if ((IdxCmt == -1 || IdxCmt > idxSubConvert) && idxSubConvert > -1)
+                            //            {
+                            //                txtConvert = txtConvert.Replace(convert_before_name, after_name);
+                            //            }
+                            //        }
+                            //    }
+                            //} 
+                            #endregion
 
-                            if (!rg.IsMatch(txtConvert) && !isHalf) //!isHalf
+                            if (!rg.IsMatch(txtConvert)) //!isHalf
                             {
                                 break;
                             }
@@ -241,8 +258,10 @@ namespace SAAPHelper.Helper
             return result;
         }
 
-        public static void ConvertComment()
+        public static void ConvertComment(bool isBefore = true, bool isAfter = true, bool isCommented = true)
         {
+            Console.WriteLine("[ConvertComment] - START {0}", DateTime.Now.ToString("MM/dd/yyyy hh:mm tt"));
+
             Console.WriteLine("[ConvertComment] - getSAAPConversion");
             DataTable dtConversion = getSAAPConversion();
 
@@ -259,126 +278,139 @@ namespace SAAPHelper.Helper
 
                 #region Before Name
                 //Before Name
-                string beforeName = GetConversionFileName(id, form_name, "BeforeName");
-                string outBeforeName = Path.Combine(Constants.pathFolder, beforeName);
-
-                if (File.Exists(outBeforeName))
+                if (isBefore)
                 {
-                    File.Delete(outBeforeName);
+                    string beforeName = GetConversionFileName(id, form_name, "BeforeName");
+                    string outBeforeName = Path.Combine(Constants.pathFolder, beforeName);
+
+                    if (File.Exists(outBeforeName))
+                    {
+                        File.Delete(outBeforeName);
+                    }
+
+                    using (StreamWriter writerBeforeName = new StreamWriter(outBeforeName))
+                    {
+                        writerBeforeName.WriteLine(before_source);
+                    }
                 }
 
-                using (StreamWriter writerBeforeName = new StreamWriter(outBeforeName))
-                {
-
-                    writerBeforeName.WriteLine(before_source);
-                }
                 #endregion
 
                 #region After Name
                 //After Name
-                string afterName = GetConversionFileName(id, form_name, "AfterName");
-                string outAfterName = Path.Combine(Constants.pathFolder, afterName);
-
-                if (File.Exists(outAfterName))
+                if (isAfter)
                 {
-                    File.Delete(outAfterName);
-                }
+                    string afterName = GetConversionFileName(id, form_name, "AfterName");
+                    string outAfterName = Path.Combine(Constants.pathFolder, afterName);
 
-                using (StreamWriter writerAfterName = new StreamWriter(outAfterName))
-                {
-
-                    writerAfterName.WriteLine(After_source);
-                }
-                #endregion
-
-                string filename = Path.GetFileName(form_name);
-                string OutputFile = GetConversionFileName(id, filename, Constants.CommentName);
-
-                // Create a Regex
-                Regex rg = new Regex(Constants.pattern);
-
-                string[] arrBefore = before_source.Split(new string[] { Environment.NewLine,"\n" }, StringSplitOptions.None);
-                string[] fileContents = After_source.Split(new string[] { Environment.NewLine, "\n" }, StringSplitOptions.None);
-                string outFile = Path.Combine(Constants.pathFolder, OutputFile);
-
-                if (File.Exists(outFile))
-                {
-                    File.Delete(outFile);
-                }
-
-                DataTable dtResult = GetANAMEConversion();
-                using (StreamWriter writer = new StreamWriter(outFile))
-                {
-                    int LineCode = 0;
-                    foreach (string line in fileContents)
+                    if (File.Exists(outAfterName))
                     {
-                       
-                        Console.WriteLine("[ConvertComment] - [File Name] {0} [Line Code] {1}\n", filename, LineCode);
+                        File.Delete(outAfterName);
+                    }
 
-                        //if (line.Contains("lngWinINet"))
-                        //{
-                        //    bool val = true;
-                        //}
+                    using (StreamWriter writerAfterName = new StreamWriter(outAfterName))
+                    {
 
-                        string txtConvert = string.Empty;
-                        string txtBefore = string.Empty;
-                        
-                        txtConvert = line;
-                        txtBefore = arrBefore[LineCode];
-
-
-                        int IdxCmt = FuncHelper.GetStartIdxCommented(line);
-                        int IdxBefore = FuncHelper.GetStartIdxCommented(txtBefore);
-
-                        //&& IdxBefore !=-1
-                        if (IdxCmt != -1 )
-                        {
-                           
-
-                            if (IdxCmt == 0)
-                            {
-                                txtConvert = txtBefore;
-                            }
-                            else
-                            {
-                                string txtComment = string.Empty;
-                                string txtBeforeComment = string.Empty;
-
-                                txtComment = txtConvert.Substring(IdxCmt);
-                                txtConvert = txtConvert.Substring(0, IdxCmt);
-
-                                txtBeforeComment = txtBefore.Substring(IdxBefore);
-
-                                //foreach (DataRow dr in dtResult.Rows)
-                                //{
-                                //    string before_name = dr["before_name"].ToString();
-                                //    string after_name = dr["after_name"].ToString();
-
-                                //    int idxSubtext = line.IndexOf(before_name);
-
-                                //    if ((IdxCmt == -1 || (IdxCmt > idxSubtext)) && idxSubtext > -1)
-                                //    {
-                                //        txtComment = txtComment.Replace(after_name,before_name);
-                                //    }
-
-                                //    if (!rg.IsMatch(txtComment)) //!isHalf
-                                //    {
-                                //        break;
-                                //    }
-                                //}
-
-                                if (!string.IsNullOrEmpty(txtBeforeComment))
-                                {
-                                    txtConvert = txtConvert + txtBeforeComment;
-                                }
-                            }
-                        }
-
-                        writer.WriteLine(txtConvert);
-                        LineCode++;
+                        writerAfterName.WriteLine(After_source);
                     }
                 }
+
+                #endregion
+
+                #region Replace Commented
+
+                //Replace Commented
+                if (isCommented)
+                {
+                    string filename = Path.GetFileName(form_name);
+                    string OutputFile = GetConversionFileName(id, filename, Constants.CommentName);
+
+                    // Create a Regex
+                    Regex rg = new Regex(Constants.pattern);
+
+                    string[] arrBefore = before_source.Split(new string[] { Environment.NewLine, "\n" }, StringSplitOptions.None);
+                    string[] fileContents = After_source.Split(new string[] { Environment.NewLine, "\n" }, StringSplitOptions.None);
+                    string outFile = Path.Combine(Constants.pathFolder, OutputFile);
+
+                    if (File.Exists(outFile))
+                    {
+                        File.Delete(outFile);
+                    }
+
+
+                    DateTime StartTime  = DateTime.Now;
+                    DataTable dtResult = GetANAMEConversion();
+                    using (StreamWriter writer = new StreamWriter(outFile))
+                    {
+                        int LineCode = 0;
+                        foreach (string line in fileContents)
+                        {
+
+                            Console.WriteLine("[ConvertComment] - [File Name] {0} [Line Code] #{1} [TimeSpan] {2}\n", filename, LineCode, (DateTime.Now - StartTime));
+
+                            string txtConvert = string.Empty;
+                            string txtBefore = string.Empty;
+
+                            txtConvert = line;
+                            txtBefore = arrBefore[LineCode];
+
+
+                            int IdxCmt = FuncHelper.GetStartIdxCommented(line);
+                            int IdxBefore = FuncHelper.GetStartIdxCommented(txtBefore);
+
+                            //&& IdxBefore !=-1
+                            if (IdxCmt != -1 && IdxBefore !=-1)
+                            {
+
+
+                                if (IdxCmt == 0)
+                                {
+                                    txtConvert = txtBefore;
+                                }
+                                else
+                                {
+                                    string txtComment = string.Empty;
+                                    string txtBeforeComment = string.Empty;
+
+                                    txtComment = txtConvert.Substring(IdxCmt);
+                                    txtConvert = txtConvert.Substring(0, IdxCmt);
+
+                                    txtBeforeComment = txtBefore.Substring(IdxBefore);
+
+                                    //foreach (DataRow dr in dtResult.Rows)
+                                    //{
+                                    //    string before_name = dr["before_name"].ToString();
+                                    //    string after_name = dr["after_name"].ToString();
+
+                                    //    int idxSubtext = line.IndexOf(before_name);
+
+                                    //    if ((IdxCmt == -1 || (IdxCmt > idxSubtext)) && idxSubtext > -1)
+                                    //    {
+                                    //        txtComment = txtComment.Replace(after_name,before_name);
+                                    //    }
+
+                                    //    if (!rg.IsMatch(txtComment)) //!isHalf
+                                    //    {
+                                    //        break;
+                                    //    }
+                                    //}
+
+                                    if (!string.IsNullOrEmpty(txtBeforeComment))
+                                    {
+                                        txtConvert = txtConvert + txtBeforeComment;
+                                    }
+                                }
+                            }
+
+                            writer.WriteLine(txtConvert);
+                            LineCode++;
+                        }
+                    }
+                } 
+                #endregion
             }
+
+            Console.WriteLine("[ConvertComment] - END {0}", DateTime.Now.ToString("MM/dd/yyyy hh:mm tt"));
         }
 
         private static DataTable getSAAPConversion()
@@ -393,7 +425,7 @@ namespace SAAPHelper.Helper
             sql = sql + " FROM [dbo].[ANAME_conversion] ";
             sql = sql + " Where ISnull(After_source,N'') != N'' ";
             //sql = sql + " And [ID] > 22 ";
-            sql = sql + " And [ID] IN (11,22) ";
+            sql = sql + " And [ID] IN (1,2,3,4,5,8) ";
             // sql = sql + " And [ID] IN (1,2,3,4,5,8,9,10,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27) ";
             sql = sql + " OrDer By [ID] ";
 

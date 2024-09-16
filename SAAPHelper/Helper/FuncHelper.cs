@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace SAAPHelper.Helper
@@ -80,16 +81,32 @@ namespace SAAPHelper.Helper
             if (chkTextIsNotCommented(txtValue))
             {
                 int idx = 0;
-                txtValue = txtValue.Replace("N''''","@AAA@");
-                txtValue = txtValue.Replace("N''", "@A@");
-                txtValue = txtValue.Replace("'サブフォーム'","@サブフォーム@");
+                //txtValue = txtValue.Replace("N''''","@AAA@");
+                //txtValue = txtValue.Replace("N''", "@A@");
+                //txtValue = txtValue.Replace("\"'\"", "@@@");
+                //txtValue = txtValue.Replace("' \"", "@@@");
+                //txtValue = txtValue.Replace("\"'", "@@");
+                //txtValue = txtValue.Replace("\"'■", "@@@");
+                //txtValue = txtValue.Replace("'サブフォーム'","@サブフォーム@");
+                //txtValue = txtValue.Replace("'Subform'", "@Subform@");
+                //txtValue = txtValue.Replace("'subform'", "@subform@");
+                //txtValue = txtValue.Replace("'計算式'", "@計算式@");
+                //txtValue = txtValue.Replace("'Calculation_formula'", "@Calculation_formula@");
+                //txtValue = txtValue.Replace("'合計計算'","@合計計算@");
+                //txtValue = txtValue.Replace("'Total_Calculation'", "@Total_Calculation@");
 
-                txtValue = txtValue.Replace("'計算式'", "@計算式@");
-                txtValue = txtValue.Replace("'Calculation_formula'", "@Calculation_formula@");
-                txtValue = txtValue.Replace("'Subform'", "@Subform@");
-                txtValue = txtValue.Replace("\"'\"", "@@@");
-                txtValue = txtValue.Replace("\"'■", "@@@");
-
+                Regex.Replace(txtValue, "N''''", "@AAA@", RegexOptions.IgnoreCase);
+                Regex.Replace(txtValue, "N''", "@A@", RegexOptions.IgnoreCase);
+                Regex.Replace(txtValue, "\"'\"", "@@@", RegexOptions.IgnoreCase);
+                Regex.Replace(txtValue, "' \"", "@@@", RegexOptions.IgnoreCase);
+                Regex.Replace(txtValue, "\"'", "@@", RegexOptions.IgnoreCase);
+                Regex.Replace(txtValue, "\"'■", "@@@", RegexOptions.IgnoreCase);
+                Regex.Replace(txtValue, "'サブフォーム'", "@サブフォーム@", RegexOptions.IgnoreCase);
+                Regex.Replace(txtValue, "'Subform'", "@Subform@", RegexOptions.IgnoreCase);
+                Regex.Replace(txtValue, "'計算式'", "@計算式@", RegexOptions.IgnoreCase);
+                Regex.Replace(txtValue, "'Calculation_formula'", "@Calculation_formula@", RegexOptions.IgnoreCase);
+                Regex.Replace(txtValue, "'合計計算'", "@合計計算@", RegexOptions.IgnoreCase);
+                Regex.Replace(txtValue, "'Total_Calculation'", "@Total_Calculation@", RegexOptions.IgnoreCase);
 
                 while (idx != -1 && txtValue.Length > 0)
                 {

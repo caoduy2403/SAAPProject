@@ -36,6 +36,8 @@ namespace SAAPHelper.Helper
             return rg.IsMatch(textValue);
         }
 
+       
+
         public static bool IsContainedHalfWidth(string textValue)
         {
             bool isHalfWidth = false;
@@ -50,7 +52,9 @@ namespace SAAPHelper.Helper
             return isHalfWidth;
         }
 
-        public static string ConvertFulToHalf(string txtValue)
+
+
+        public static string ConvertFullToHalf(string txtValue)
         {
             StringBuilder sbResult = new StringBuilder(txtValue);
             for (int i = 0; i < txtValue.Length; i++)
@@ -76,6 +80,29 @@ namespace SAAPHelper.Helper
             return sbResult.ToString();
         }
 
-       
+        #region LINQ
+
+        public static bool IsContainedHalfWidthLINQ(string textValue)
+        {
+            return textValue.Any(ch => _dicHalfToFull.ContainsKey(ch));
+        }
+
+        public static string ConvertHalfToFullLINQ(string txtValue)
+        {
+            StringBuilder sbResult = new StringBuilder(txtValue);
+            for (int i = 0; i < txtValue.Length; i++)
+            {
+                if (_dicHalfToFull.ContainsKey(txtValue[i]))
+                {
+                    sbResult[i] = _dicHalfToFull[txtValue[i]];
+                }
+            }
+            return sbResult.ToString();
+        }
+
+        #endregion
+
+
+
     }
 }
