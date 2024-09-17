@@ -11,7 +11,7 @@ namespace SAAPHelper.Constant
         public const string pathFolder = "C:\\Users\\AZIP\\Desktop\\SAAPLibrary";
         public const string OutputName = "Output";
         public const string ConvertName = "V1";
-        public const string CommentName = "CmtV1";
+        public const string CommentName = "CmtReviewed";
         /// <summary>
         /// regex to check japanese
         /// </summary>

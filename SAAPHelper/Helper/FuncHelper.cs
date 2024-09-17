@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+using SAAPHelper.Constant;
 
 namespace SAAPHelper.Helper
 {
@@ -80,6 +77,8 @@ namespace SAAPHelper.Helper
             int result = 0;
             if (chkTextIsNotCommented(txtValue))
             {
+                txtValue = ApostropheIsNotCommented(txtValue);
+
                 int idx = 0;
                 //txtValue = txtValue.Replace("N''''","@AAA@");
                 //txtValue = txtValue.Replace("N''", "@A@");
@@ -141,6 +140,51 @@ namespace SAAPHelper.Helper
                 }
             }
 
+            return result;
+        }
+
+        public static string ApostropheIsNotCommented(string txtValue)
+        {
+            string result = txtValue;
+           
+            int idxFirst = txtValue.IndexOf(Separator.DoubleQuotes);
+
+            if (idxFirst == -1)
+            {
+                return result;
+            }
+
+            int idxSecond;
+            result = string.Empty;
+
+            while (idxFirst != -1 && txtValue.Length > 0)
+            {
+                idxFirst = txtValue.IndexOf(Separator.DoubleQuotes);
+                if (idxFirst == -1)
+                {
+                    result = result + txtValue;
+                    return result;
+                }
+
+                idxSecond = txtValue.IndexOf(Separator.DoubleQuotes, idxFirst + 1);
+                txtValue = ReplaceTextIsNotCommented(txtValue, idxFirst, idxSecond);
+                result = result + txtValue.Substring(0, idxSecond);
+                txtValue = txtValue.Substring(idxSecond);
+            }
+
+            return result;
+        }
+
+        public static string ReplaceTextIsNotCommented(string txtValue, int startIdx, int endIdx)
+        {
+            string result = string.Empty;
+            string firstString = txtValue.Substring(0, startIdx);
+            string mainString = txtValue.Substring(startIdx, endIdx + 1 - startIdx);
+            string lastString = txtValue.Substring(endIdx + 1);
+
+            mainString = mainString.Replace("'", "@");
+            mainString = mainString.Replace("\"", "@");
+            result = firstString + mainString + lastString;
             return result;
         }
 
