@@ -20,223 +20,72 @@ using System.Reflection;
 
 namespace FileHelper
 {
-    public class Product
-    {
-        public int ID { get; set; }
-        public string Category { get; set; }
-    }
-
     internal class Program
     {
-        //https://www.c-sharpcorner.com/article/export-and-import-excel-file-using-closedxml-in-asp-net-mvc/
-        private const string pathFolder = "C:\\Users\\AZIP\\Desktop\\SAAPLibrary";
-        //private const string baseUrl = "http://api.mymemory.translated.net";
         static void Main(string[] args)
         {
-            //string[] arrayString = {"Gc Digital Processing Type_Card Type M","Gc Digital Processing Type_List Type M",};
-
-
-            Console.WriteLine(" BEGIN ");
-
-            DataTable dt = new DataTable();
-            dt.Columns.Add("ID", typeof(int));
-            dt.Columns.Add("Category", typeof(string));
-            dt.Rows.Add(1, "Electronics");
-            dt.Rows.Add(2, "Books");
-
-            object resultModel = FuncSelect(dt.Rows[0]);
-
-
-            var result = (from rw in dt.AsEnumerable()
-                          select GetItemV1<Product>(rw)).ToList();
-
-            foreach (var item in result)
-            { 
-                Console.WriteLine("ID = {0} Category {1}\n", item.ID, item.Category);
-            }
-
-            //foreach (string str in arrayString)
-            //{
-            //    string message = CapitalizeFirstLetterWithMessage(str);
-            //    string varible = CapitalizeFirstLetterWithVarible(str);
-
-                //    Console.WriteLine("Message {0} \nVarible {1} \n", message, varible);
-                //}
-
-            Console.WriteLine(" END ");
-
-            Console.ReadKey();
-        }
-
-        private List<T> GetListByDataTable<T>(DataTable dt)
-        {
-            var result = (from rw in dt.AsEnumerable()
-                          select GetItem<T>(rw)).ToList();
-
-            return result;
-        }
-
-        private static object FuncSelect(DataRow dr)
-        {
-            object oResult = new
+            bool showMenu = true;
+            while (showMenu)
             {
-                ID = dr.Field<int>("ID"),
-                Category = dr.Field<string>("Category")
-            };
-
-            return oResult;
+                showMenu = MainMenu();
+            }
         }
-
-        private static T GetItemV1<T>(DataRow dr)
+        private static bool MainMenu()
         {
-            Type temp = typeof(T);
-            T obj = Activator.CreateInstance<T>();
+            Console.Clear();
+            Console.WriteLine("Choose an option:");
+            Console.WriteLine("1) Reverse String");
+            Console.WriteLine("2) Remove Whitespace");
+            Console.WriteLine("3) Exit");
+            Console.Write("\r\nSelect an option: ");
 
-            foreach (DataColumn col in dr.Table.Columns)
+            switch (Console.ReadLine())
             {
-                var prop = obj.GetType().GetProperty(col.ColumnName);
-                if (prop != null && dr[col] != DBNull.Value)
-                    prop.SetValue(obj, dr[col]);
-            }
-            return obj;
-        }
-
-        private static T GetItem<T>(DataRow dr)
-        {
-            Type temp = typeof(T);
-            T obj = Activator.CreateInstance<T>();
-
-            foreach (DataColumn column in dr.Table.Columns)
-            {
-                foreach (PropertyInfo pro in temp.GetProperties())
-                {
-                    if (pro.Name == column.ColumnName)
-                        pro.SetValue(obj, dr[column.ColumnName], null);
-                    else
-                        continue;
-                }
-            }
-            return obj;
-        }
-
-        private static void LinqMethod(DataTable dt)
-        {
-            var list = dt.AsEnumerable().Select(row =>
-                new
-                {
-                    ID = row.Field<int>("ID"),
-                    Category = row.Field<string>("Category")
-
-                }).ToList();
-        }
-
-        public static readonly string Space = " ";
-        public static readonly string Underscore = "_";
-        public static readonly string Commas = ";";
-        public static readonly string Tab = "\t";
-        public static readonly string QuestionMark = "?";
-        public static readonly string Exclamation = "!";
-        public static readonly string Colons = ":";
-        public static readonly string SemiColons = ";";
-
-        public static string CapitalizeFirstLetter(string inputString, string separator)
-        {
-            // Split the input string into words, capitalize the first character of each word, and join them back into a string
-            return string.Join(separator.ToString(), inputString.Split(' ').Select(word => char.ToUpper(word[0]) + word.Substring(1)));
-        }
-
-        public static string CapitalizeFirstLetterWithMessage(string inputString)
-        {
-            // Split the input string into words, capitalize the first character of each word, and join them back into a string
-            //return CapitalizeFirstLetter(inputString, Separator.Space);
-            return string.Join(" ", inputString.Split(' ').Select(word => char.ToUpper(word[0]) + word.Substring(1)));
-        }
-
-
-        public static string CapitalizeFirstLetterWithVarible(string inputString)
-        {
-            string[] arrayString = inputString.Trim().Split(' ');
-            if (arrayString.Length < 2)
-            {
-                return string.Join(" ", arrayString);
-            }
-
-            string strResult = string.Empty;
-            string firstString = arrayString[0];
-
-            if (firstString.Length < 3 || firstString == firstString.ToLower())
-            {
-                string lastString = string.Join(Underscore, inputString.Split(' ').Where((word, i) => i > 1).Select(word => char.ToUpper(word[0]) + word.Substring(1)));
-                strResult = string.Concat(firstString, lastString);
-            }
-            else {
-                strResult = string.Join(Underscore, arrayString.Select(word => char.ToUpper(word[0]) + word.Substring(1)));
-            }
-            return strResult;
-        }
-
-        public static async Task<string> MainAsync(string text, string sourceLang = "ja", string targetLang = "en")
-        {
-            try
-            {
-                HttpClient httpClient = new HttpClient();
-                if (string.IsNullOrEmpty(text))
-                {
-                    return string.Empty;
-                }
-
-                if (GetByteCount(text) > 500)
-                {
-                    return string.Empty;
-                }
-
-                string url = $"http://api.mymemory.translated.net/get?q={Uri.EscapeDataString(text)}&langpair={sourceLang}|{targetLang}";
-                HttpResponseMessage response = await httpClient.GetAsync(url);
-                response.EnsureSuccessStatusCode();
-                string responseJson = await response.Content.ReadAsStringAsync();
-                var trans = JsonConvert.DeserializeObject<TranslationResponse>(responseJson);
-
-                if (trans.ResponseStatus == 200)
-                {
-                    return trans.ResponseData.TranslatedText;
-                }
-                return string.Empty;
-            }
-            catch (Exception ex)
-            {
-                return string.Empty;
+                case "1":
+                    ReverseString();
+                    return true;
+                case "2":
+                    //RemoveWhitespace();
+                    Console.WriteLine($"\r\nYour modified string is: ");
+                    Console.Write("\r\nPress Enter to return to Main Menu");
+                    Console.ReadLine();
+                    return true;
+                case "3":
+                    return false;
+                default:
+                    return true;
             }
         }
 
-        public static int GetByteCount(string input)
+        private static string CaptureInput()
         {
-            int intByteCount = 0;
-            System.Text.Encoding sjisEnc = System.Text.Encoding.GetEncoding("Shift_JIS");
-            intByteCount = sjisEnc.GetByteCount(input);
-            return intByteCount;
-
+            Console.Write("Enter the string you want to modify: ");
+            return Console.ReadLine();
         }
 
-        public class TranslationResponse
+        private static void ReverseString()
         {
-            [JsonProperty(PropertyName = "responseData")]
-            public ResponseData ResponseData { get; set; }
-         
-            /// <summary>
-            /// 200: OK
-            /// </summary>
-           [JsonProperty(PropertyName = "responseStatus")]
-            public int ResponseStatus { get; set; }
+            Console.Clear();
+            Console.WriteLine("Reverse String");
+
+            char[] charArray = CaptureInput().ToCharArray();
+            Array.Reverse(charArray);
+            DisplayResult(String.Concat(charArray));
         }
 
-        public class ResponseData
+        private static void RemoveWhitespace()
         {
-            [JsonProperty(PropertyName = "translatedText")]
-            public string TranslatedText { get; set; }
+            Console.Clear();
+            Console.WriteLine("Remove Whitespace");
 
-            //[JsonProperty(PropertyName = "match")]
-            //public string Match { get; set; }
+            DisplayResult(CaptureInput().Replace(" ", ""));
         }
 
+        private static void DisplayResult(string message)
+        {
+            Console.WriteLine($"\r\nYour modified string is: {message}");
+            Console.Write("\r\nPress Enter to return to Main Menu");
+            Console.ReadLine();
+        }
     }
 }

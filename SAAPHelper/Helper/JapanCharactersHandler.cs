@@ -29,6 +29,29 @@ namespace SAAPHelper.Helper
             }
         }
 
+        //String message = 'EnglishLetters - みずずほダイレクト';
+        //String regex = '[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\uff66-\uff9f]';
+        //Pattern regexPattern = Pattern.compile(regex);
+        //Matcher regexMatcher = regexPattern.matcher(message);
+        //system.assert(regexMatcher.find());
+        //var romaji = GetCharsInRange(searchKeyword, 0x0020, 0x007E);
+        //var hiragana = GetCharsInRange(searchKeyword, 0x3040, 0x309F);
+        //var katakana = GetCharsInRange(searchKeyword, 0x30A0, 0x30FF);
+        //var kanji = GetCharsInRange(searchKeyword, 0x4E00, 0x9FBF);
+        /// <summary>
+        /// https://stackoverflow.com/questions/15805859/detect-japanese-character-input-and-romajis-ascii
+        /// https://salesforce.stackexchange.com/questions/176498/check-if-a-string-contains-a-japanese-letter
+        /// </summary>
+        /// <param name="text"></param>
+        /// <param name="min"></param>
+        /// <param name="max"></param>
+        /// <returns></returns>
+        private static IEnumerable<char> GetCharsInRange(string text, int min, int max)
+        {
+            return text.Where(e => e >= min && e <= max);
+        }
+
+
         public static bool IsJapaneseMatch(string textValue)
         {
             // Create a Regex

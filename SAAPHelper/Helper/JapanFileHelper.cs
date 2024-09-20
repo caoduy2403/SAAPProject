@@ -172,27 +172,15 @@ namespace SAAPHelper.Helper
                         {
                             string before_name = dr["before_name"].ToString();
                             string after_name = dr["after_name"].ToString();
-                            bool IsReplaced = false;
+                            //bool IsReplaced = false;
 
-                            bool isHalfConvertString = JapanCharactersHandler.IsContainedHalfWidth(txtConvert);
-                            if (isHalfConvertString)
-                            {
-                                txtConvert = JapanCharactersHandler.ConvertHalfToFull(txtConvert);
-                            }
-
-                            bool isHalfBeforeName = JapanCharactersHandler.IsContainedHalfWidth(before_name);
-                            if (isHalfBeforeName)
-                            {
-                                before_name = JapanCharactersHandler.ConvertHalfToFull(before_name);
-                            }
-
-                            int idxSubtext = line.IndexOf(before_name, StringComparison.OrdinalIgnoreCase);
+                            int idxSubtext = line.IndexOf(before_name); //StringComparison.OrdinalIgnoreCase
 
                             if ((IdxCmt == -1 || (IdxCmt > idxSubtext)) && idxSubtext > -1)
                             {
-                                Regex.Replace(txtConvert, before_name, after_name, RegexOptions.IgnoreCase);
-                                //txtConvert = txtConvert.Replace(before_name, after_name);
-                                IsReplaced = true;
+                                //Regex.Replace(txtConvert, before_name, after_name, RegexOptions.IgnoreCase);
+                                txtConvert = txtConvert.Replace(before_name, after_name);
+                                //IsReplaced = true;
                             }
 
                             #region Convert To Half Width
@@ -234,10 +222,10 @@ namespace SAAPHelper.Helper
                             //} 
                             #endregion
 
-                            if (!rg.IsMatch(txtConvert)) //!isHalf
-                            {
-                                break;
-                            }
+                            //if (!rg.IsMatch(txtConvert)) //!isHalf
+                            //{
+                            //    break;
+                            //}
                         }
 
                         if (!string.IsNullOrEmpty(ConvertLast))
@@ -254,7 +242,7 @@ namespace SAAPHelper.Helper
 
         public static string GetConversionFileName(string id, string form_name,string file_name = "")
         {
-            string result = id + "." + form_name + file_name + ExtensionFile.TEXT;
+            string result = id + "." + form_name + "_" + file_name + ExtensionFile.TEXT;
             return result;
         }
 
@@ -406,13 +394,15 @@ namespace SAAPHelper.Helper
             sql = sql + "       ,[After_source] ";
             sql = sql + " FROM [dbo].[ANAME_conversion] ";
             sql = sql + " Where ISnull(After_source,N'') != N'' ";
-            //sql = sql + " And [ID] IN (9,10,12,13,14,15,16,17,18,19,23)\r\n ";
-            
-            sql = sql + " And [ID] IN (14,15,16,17,18,23) \r\n ";
-            //sql = sql + " And [ID] IN (1,2,3,4,5,8) ";
 
-            //sql = sql + " And [ID] IN (19) ";
-            //sql = sql + " And [ID] IN (14,15,16,17,18,23) \r\n ";
+            //sql = sql + " And [ID] IN (9,10,12,13,14,15,16,17,18,19,23)\r\n ";
+            //sql = sql + " And [ID] IN (24) \r\n ";
+
+            sql = sql + " And [ID] IN (24)\r\n ";
+            //sql = sql + " And [ID] IN (11,20,21,22,24,25,26,27) \r\n ";
+
+            //sql = sql + " And [ID] IN (1,2,3,4,5,8,9,10) ";
+
             //sql = sql + " And [ID] IN (1,2,3,4,5,8,9,10,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27) ";
 
             sql = sql + " OrDer By [ID] ";
@@ -427,23 +417,11 @@ namespace SAAPHelper.Helper
             DataTable dtResult = new DataTable();
 
             string sql = string.Empty;
-
-            sql = sql + "select *";
-            sql = sql + "from (";
-            sql = sql + "	select [before_name]";
+          
+            sql = sql + "select [before_name]";
             sql = sql + "		,[after_name]";
-            sql = sql + "	from [dbo].[SAAP_AName_Conversion]";
-            sql = sql + "	";
-            sql = sql + "	union ";
-            sql = sql + "	";
-            sql = sql + "	select [before_name]";
-            sql = sql + "		,[after_name]";
-            sql = sql + "	from [dbo].[SAAP_AName_Conversion_SAAP6Lib]";
-            sql = sql + "	where is_deleted <> 1 ";
-            //sql = sql + "	where [object_category] = N'Blobデジタルファイル処理'";
-            //sql = sql + "	and [before_name] = N'ｴﾗｰ'";
-            sql = sql + "";
-            sql = sql + "	) temp ";
+            sql = sql + "from [dbo].[SAAP_AName_Conversion]";
+        
             //sql = sql + " Where temp.after_name LIKE N'%and%' ";
             sql = sql + "order by Len(before_name) desc";
 

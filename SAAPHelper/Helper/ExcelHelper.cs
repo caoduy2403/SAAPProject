@@ -18,7 +18,7 @@ namespace SAAPHelper.Helper
         {
             try
             {
-                if (list == null || list.Count < 1)
+                if (list == null || list.Count == 0)
                 {
                     Console.WriteLine("ExcelHelper.SaveAs DataExcelModel");
                     return;
@@ -26,11 +26,16 @@ namespace SAAPHelper.Helper
 
                 string fileName = String.Empty;
                 fileName = pFileName.Replace('-', '_');
+                string SheetName = fileName;
+                if (SheetName.Length > 31)
+                {
+                    SheetName = "Sheet1";
+                }
 
                 XLWorkbook workbook = new XLWorkbook();
                 DataTable dt = list.ToDataTable();
 
-                dt.TableName = fileName;
+                dt.TableName = SheetName;
                 workbook.Worksheets.Add(dt);
                 string excelPath = Path.Combine(Constants.pathFolder, fileName + ".xlsx");
                 workbook.SaveAs(excelPath);

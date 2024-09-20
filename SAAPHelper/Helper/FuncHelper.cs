@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Text.RegularExpressions;
 using SAAPHelper.Constant;
+using System;
 
 namespace SAAPHelper.Helper
 {
@@ -160,13 +161,13 @@ namespace SAAPHelper.Helper
             while (idxFirst != -1 && txtValue.Length > 0)
             {
                 idxFirst = txtValue.IndexOf(Separator.DoubleQuotes);
-                if (idxFirst == -1)
+                idxSecond = txtValue.IndexOf(Separator.DoubleQuotes, idxFirst + 1);
+                if (idxFirst == -1 || idxSecond == -1)
                 {
                     result = result + txtValue;
                     return result;
                 }
 
-                idxSecond = txtValue.IndexOf(Separator.DoubleQuotes, idxFirst + 1);
                 txtValue = ReplaceTextIsNotCommented(txtValue, idxFirst, idxSecond);
                 result = result + txtValue.Substring(0, idxSecond);
                 txtValue = txtValue.Substring(idxSecond);
@@ -177,15 +178,23 @@ namespace SAAPHelper.Helper
 
         public static string ReplaceTextIsNotCommented(string txtValue, int startIdx, int endIdx)
         {
-            string result = string.Empty;
-            string firstString = txtValue.Substring(0, startIdx);
-            string mainString = txtValue.Substring(startIdx, endIdx + 1 - startIdx);
-            string lastString = txtValue.Substring(endIdx + 1);
+            try
+            {
+                string result = string.Empty;
+                string firstString = txtValue.Substring(0, startIdx);
+                string mainString = txtValue.Substring(startIdx, endIdx + 1 - startIdx);
+                string lastString = txtValue.Substring(endIdx + 1);
 
-            mainString = mainString.Replace("'", "@");
-            mainString = mainString.Replace("\"", "@");
-            result = firstString + mainString + lastString;
-            return result;
+                mainString = mainString.Replace("'", "@");
+                mainString = mainString.Replace("\"", "@");
+                result = firstString + mainString + lastString;
+                return result;
+            }
+            catch (Exception ex)
+            { 
+                Console.WriteLine("Exception.ReplaceTextIsNotCommented ", ex.ToString());
+                return txtValue;
+            }
         }
 
         public static int GetLengthApostrophes(string txtValue)
