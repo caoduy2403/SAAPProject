@@ -9,9 +9,9 @@ namespace SAAPHelper.Constant
     public class Constants
     {
         public const string pathFolder = "C:\\Users\\AZIP\\Desktop\\SAAPLibrary";
-        public const string OutputName = "Output";
-        public const string ConvertName = "V1";
-        public const string CommentName = "Reviewed";
+        public const string OutputName = "GetText";
+        public const string ConvertName = "Converted";
+        public const string CommentName = "ReviewedNew";
         /// <summary>
         /// regex to check japanese
         /// </summary>

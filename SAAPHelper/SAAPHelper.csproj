@@ -166,6 +166,8 @@
     <Compile Include="Helper\FuncHelper.cs" />
     <Compile Include="Helper\JapanCharactersHandler.cs" />
     <Compile Include="Helper\JapanFileHelper.cs" />
+    <Compile Include="Helper\FolderHelper .cs" />
+    <Compile Include="Helper\MenuHelper.cs" />
     <Compile Include="Helper\TableHelper.cs" />
     <Compile Include="Helper\TranslateHelper.cs" />
     <Compile Include="Models\DataModel.cs" />

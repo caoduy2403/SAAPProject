@@ -13,6 +13,49 @@ namespace SAAPHelper.Helper
 {
     public class JapanFileHelper
     {
+
+        public static void HandleJapaneseTextFile(bool isTranslated = false)
+        {
+            DateTime StartTime = DateTime.Now;
+            Console.WriteLine("====================[HandleJapaneseTextFile - START]==================== [{0}] \n", StartTime.ToString("MM/dd/yyyy hh:mm:ss"));
+
+            string[] fileArray = Directory.GetFiles(Constants.pathFolder, "*.txt");
+            foreach (string fileUrl in fileArray)
+            {
+                if (!fileUrl.Contains(Constants.OutputName)
+                    && !fileUrl.Contains(Constants.ConvertName)
+                    && !fileUrl.Contains(Constants.CommentName))
+                {
+                    string filename = System.IO.Path.GetFileName(fileUrl);
+                    GetJapaneseTextFile(fileUrl, isTranslated);
+                }
+            }
+
+            DateTime EndTime = DateTime.Now;
+            Console.WriteLine("=====================[HandleJapaneseTextFile - END]===================== [{0}] [{1}] ", EndTime.ToString("MM/dd/yyyy hh:mm:ss"), (DateTime.Now - StartTime));
+        }
+
+        public static void HandleConvertFile()
+        {
+            DateTime StartTime = DateTime.Now;
+            Console.WriteLine("====================[HandleConvertFile - START]==================== [{0}] \n", StartTime.ToString("MM/dd/yyyy hh:mm:ss"));
+           
+            string[] fileArray = Directory.GetFiles(Constants.pathFolder, "*.txt");
+            foreach (string fileUrl in fileArray)
+            {
+                if (!fileUrl.Contains(Constants.OutputName) 
+                    && !fileUrl.Contains(Constants.ConvertName) 
+                    && !fileUrl.Contains(Constants.CommentName))
+                {
+                    Console.WriteLine("File Name [{0}]", fileUrl);
+                    ConvertFile(fileUrl);
+                }
+            }
+
+            DateTime EndTime = DateTime.Now;
+            Console.WriteLine("=====================[HandleConvertFile - END]===================== [{0}] [{1}] ", EndTime.ToString("MM/dd/yyyy hh:mm:ss"), (DateTime.Now - StartTime));
+        }
+
         public static void GetJapaneseTextFile(string fileUrl, bool isTranslated = false)
         {
             string fileUrlname = Path.GetFileName(fileUrl);
@@ -45,7 +88,7 @@ namespace SAAPHelper.Helper
                 foreach (string line in fileContents)
                 {
                     LineCode++;
-                    Console.WriteLine("[GetJapaneseTextFile] - [File Name] {0} [Line Code] #{1} [TimeSpan] {2}\n", filename, LineCode, (DateTime.Now - StartTime));
+                    //Console.WriteLine("[GetJapaneseTextFile] - [File Name] {0} [Line Code] #{1} [TimeSpan] {2}\n", filename, LineCode, (DateTime.Now - StartTime));
 
                     if(FuncHelper.chkTextIsNotCommented(line))
                     {
@@ -150,15 +193,13 @@ namespace SAAPHelper.Helper
                 foreach (string line in fileContents)
                 {
                     LineCode++;
-                    Console.WriteLine("[ConvertFile] - [File Name] {0} [Line Code] {1}\n", filename, LineCode);
+                    //Console.WriteLine("[ConvertFile] - [File Name] {0} [Line Code] {1}\n", filename, LineCode);
 
                     string txtConvert = string.Empty;
                     txtConvert = line;
 
-                    //if (!string.IsNullOrEmpty(line) && line.Trim().Substring(0, 1) != "'")
                     if (FuncHelper.chkTextIsNotCommented(txtConvert))
                     {
-                        //int IdxCmt = line.IndexOf("'");
                         int IdxCmt = FuncHelper.GetStartIdxCommented(line);
                         string ConvertLast = string.Empty;
 
@@ -246,11 +287,11 @@ namespace SAAPHelper.Helper
             return result;
         }
 
-        public static void RemoveComment(bool isBefore = true, bool isAfter = true, bool isCommented = true)
+        public static void ExportFile(bool isBefore = true, bool isAfter = true, bool isCommented = true)
         {
-            Console.WriteLine("[RemoveComment] - START {0}", DateTime.Now.ToString("MM/dd/yyyy hh:mm:ss"));
 
-            Console.WriteLine("[RemoveComment] - getSAAPConversion");
+            DateTime StartTime = DateTime.Now;
+            Console.WriteLine("====================[ExportFile - START==================== [{0}] \n", StartTime.ToString("MM/dd/yyyy hh:mm:ss"));
 
             DataTable dtConversion = getSAAPConversion();
 
@@ -260,18 +301,20 @@ namespace SAAPHelper.Helper
                 string form_name = drConver["form_name"].ToString();
                 string before_source = drConver["Before_source"].ToString();
                 string After_source = drConver["After_source"].ToString();
-
                
                 string transText = TranslateHelper.TranslateText(form_name);
                 form_name = CharactersHelper.CapitalizeFirstLetter(transText);
 
+               
                 #region Before Name
                 //Before Name
                 if (isBefore)
                 {
+                   
                     string beforeName = GetConversionFileName(id, form_name, "BeforeName");
                     string outBeforeName = Path.Combine(Constants.pathFolder, beforeName);
 
+                    Console.WriteLine("[Before Name] {0} \n", beforeName);
                     if (File.Exists(outBeforeName))
                     {
                         File.Delete(outBeforeName);
@@ -291,6 +334,8 @@ namespace SAAPHelper.Helper
                 {
                     string afterName = GetConversionFileName(id, form_name, "AfterName");
                     string outAfterName = Path.Combine(Constants.pathFolder, afterName);
+
+                    Console.WriteLine("[After Name] {0} \n", afterName);
 
                     if (File.Exists(outAfterName))
                     {
@@ -315,6 +360,8 @@ namespace SAAPHelper.Helper
                     string OutputFile = GetConversionFileName(id, filename, Constants.CommentName);
                     string consoleName = GetConversionFileName(id, filename,string.Empty);
 
+                    Console.WriteLine("[Replace Commented] {0} \n", OutputFile);
+
                     // Create a Regex
                     Regex rg = new Regex(Constants.pattern);
 
@@ -327,16 +374,15 @@ namespace SAAPHelper.Helper
                         File.Delete(outFile);
                     }
 
+                    //DateTime StartTime  = DateTime.Now;
 
-                    DateTime StartTime  = DateTime.Now;
                     DataTable dtResult = GetANAMEConversion();
                     using (StreamWriter writer = new StreamWriter(outFile))
                     {
                         int LineCode = 0;
                         foreach (string line in fileContents)
                         {
-
-                            Console.WriteLine("[RemoveComment] - [File Name] {0} [Line Code] #{1} [TimeSpan] {2}\n", consoleName, LineCode, (DateTime.Now - StartTime));
+                            //Console.WriteLine("[ExportFile] - [File Name] {0} [Line Code] #{1} [TimeSpan] {2}\n", consoleName, LineCode, (DateTime.Now - StartTime));
 
                             string txtConvert = string.Empty;
                             string txtBefore = string.Empty;
@@ -380,7 +426,8 @@ namespace SAAPHelper.Helper
                 #endregion
             }
 
-            Console.WriteLine("[RemoveComment] - END {0}", DateTime.Now.ToString("MM/dd/yyyy hh:mm ss"));
+            DateTime EndTime = DateTime.Now;
+            Console.WriteLine("====================[ExportFile - END]===================== [{0}] [{1}] ", EndTime.ToString("MM/dd/yyyy hh:mm:ss"), (DateTime.Now - StartTime));
         }
 
         private static DataTable getSAAPConversion()
@@ -394,17 +441,8 @@ namespace SAAPHelper.Helper
             sql = sql + "       ,[After_source] ";
             sql = sql + " FROM [dbo].[ANAME_conversion] ";
             sql = sql + " Where ISnull(After_source,N'') != N'' ";
-
-            //sql = sql + " And [ID] IN (9,10,12,13,14,15,16,17,18,19,23)\r\n ";
-            //sql = sql + " And [ID] IN (24) \r\n ";
-
-            sql = sql + " And [ID] IN (24)\r\n ";
-            //sql = sql + " And [ID] IN (11,20,21,22,24,25,26,27) \r\n ";
-
-            //sql = sql + " And [ID] IN (1,2,3,4,5,8,9,10) ";
-
+            //sql = sql + " And [ID] IN (22) ";
             //sql = sql + " And [ID] IN (1,2,3,4,5,8,9,10,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27) ";
-
             sql = sql + " OrDer By [ID] ";
 
             dtResult = DbCommand.ExecuteDataTableWithCommand(sql);
@@ -421,7 +459,6 @@ namespace SAAPHelper.Helper
             sql = sql + "select [before_name]";
             sql = sql + "		,[after_name]";
             sql = sql + "from [dbo].[SAAP_AName_Conversion]";
-        
             //sql = sql + " Where temp.after_name LIKE N'%and%' ";
             sql = sql + "order by Len(before_name) desc";
 
