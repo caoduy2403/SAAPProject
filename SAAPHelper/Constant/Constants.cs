@@ -21,7 +21,6 @@ namespace SAAPHelper.Constant
         /// get words from Split
         /// </summary>
         public static char[] delimiterChars = { ' ', ',', '.', ':', '(', ')', '{', '}', '=', '!', ',', '[', ']', '「', '」', '↑', '↓', '%', '）', '（', '<', '>', '：', '\'', '】', '【', '『', '』' };
-        public static readonly string[] _redFlag = { "ﾃｷｽﾄ", "テキスト", "ｴﾗｰ", "エラー" };
     }
 
     public class ExtensionFile

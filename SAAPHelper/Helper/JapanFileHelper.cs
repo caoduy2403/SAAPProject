@@ -90,7 +90,7 @@ namespace SAAPHelper.Helper
                 foreach (string line in fileContents)
                 {
                     LineCode++;
-                    Console.WriteLine("[GetJapaneseTextFile] - [File Name] {0} [Line Code] #{1} [TimeSpan] {2}\n", filename, LineCode, (DateTime.Now - StartTime));
+                    Console.WriteLine("[File Name] {0} [Line Code] #{1} [TimeSpan] {2}\n", filename, LineCode, (DateTime.Now - StartTime));
                     int currentLineCursor = Console.CursorTop;
                   
                     if (LineCode == countLine)
@@ -118,66 +118,69 @@ namespace SAAPHelper.Helper
                         string[] words = txtConvert.Trim().Split(' ');
                         foreach (string word in words)
                         {
-                            if (FuncHelper.chkTextIsNotCommented(word))
+                            string[] text = word.Split(Constants.delimiterChars);
+                            foreach (var subline in text)
                             {
-                                string[] text = word.Split(Constants.delimiterChars);
-                                foreach (var subline in text)
+                                string sub_text = subline.Trim();
+                                int IdxSubcmt = line.IndexOf(sub_text);
+                                sub_text = sub_text.Replace("\"'", "");
+                                sub_text = sub_text.Replace("' \"", "");
+                                sub_text = sub_text.Replace("\"", "");
+
+                                if (!rg.IsMatch(sub_text))
                                 {
-                                    string sub_text = subline.Trim();
-                                    int IdxSubcmt = line.IndexOf(sub_text);
-                                    sub_text = sub_text.Replace("\"'","");
-                                    sub_text = sub_text.Replace("' \"","");
-                                    sub_text = sub_text.Replace("\"", "");
+                                    continue;
+                                }
 
-                                    //check in database
-                                    bool isExisted = dtResult.AsEnumerable().Any(x => x.Field<string>("before_name") == sub_text);
+                                //check in database
+                                bool isExisted = dtResult.AsEnumerable().Any(x => x.Field<string>("before_name") == sub_text);
 
-                                    if (rg.IsMatch(sub_text) && !isExisted) // && !isExisted
+                                if (!isExisted) // rg.IsMatch(sub_text) && !isExisted
+                                {
+                                    //check in current file
+                                    bool isExistedConversion = lstConversion.Any(x => x.Equals(sub_text));
+
+                                    //Write to a file
+                                    if (!isExistedConversion)
                                     {
-                                        //check in current file
-                                        bool isExistedConversion = lstConversion.Any(x => x.Equals(sub_text));
+                                        lstConversion.Add(sub_text);
+                                        string textExcel = sub_text + "\t@EXCEL@" + line;
+                                        writer.WriteLine(textExcel);
 
-                                        //Write to a file
-                                        if (!isExistedConversion)
+
+                                        DataExcelModel dataExcelModel = new DataExcelModel();
+
+
+                                        string transText = string.Empty;
+                                        if (isTranslated)
                                         {
-                                            lstConversion.Add(sub_text);
-                                            string textExcel = sub_text + "\t@EXCEL@" + line;
-                                            writer.WriteLine(textExcel);
-
-
-                                            DataExcelModel dataExcelModel = new DataExcelModel();
-
-
-                                            string transText = string.Empty;
-                                            if (isTranslated)
-                                            {
-                                                //Add data to Export
-                                                transText = TranslateHelper.TranslateText(sub_text);
-                                                dataExcelModel.Variable = CharactersHelper.CapitalizeFirstLetterWithVarible(transText);
-                                                dataExcelModel.Message = CharactersHelper.CapitalizeFirstLetterWithMessage(transText);
-                                            }
-
-                                            dataExcelModel.No = No;
-                                            dataExcelModel.JA = sub_text;
-                                            dataExcelModel.EN = transText;
-                                            dataExcelModel.LineText = line;
-                                            dataExcelModel.LineCode = LineCode.ToString();
-
-                                            dataExcel.Add(dataExcelModel);
-                                            No++;
+                                            //Add data to Export
+                                            transText = TranslateHelper.TranslateText(sub_text);
+                                            dataExcelModel.Variable = CharactersHelper.CapitalizeFirstLetterWithVarible(transText);
+                                            dataExcelModel.Message = CharactersHelper.CapitalizeFirstLetterWithMessage(transText);
                                         }
-                                        else 
+
+                                        dataExcelModel.No = No;
+                                        dataExcelModel.JA = sub_text;
+                                        dataExcelModel.EN = transText;
+                                        dataExcelModel.LineText = line;
+                                        dataExcelModel.LineCode = LineCode.ToString();
+
+                                        dataExcel.Add(dataExcelModel);
+                                        No++;
+                                    }
+                                    else
+                                    {
+                                        var obj = dataExcel.FirstOrDefault(x => x.JA == sub_text);
+                                        if (obj != null)
                                         {
-                                            var obj = dataExcel.FirstOrDefault(x => x.JA == sub_text);
-                                            if (obj != null)
-                                            {
-                                                obj.LineCode = obj.LineCode + "\r\n" + LineCode.ToString();
-                                                obj.LineText = obj.LineText + "\r\n" + line;
-                                            }
+                                            obj.LineCode = obj.LineCode + "\r\n" + LineCode.ToString();
+                                            obj.LineText = obj.LineText + "\r\n" + line;
                                         }
                                     }
                                 }
                             }
+
                         }
                     }
                 }
