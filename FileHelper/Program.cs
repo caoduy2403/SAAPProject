@@ -24,11 +24,32 @@ namespace FileHelper
     {
         static void Main(string[] args)
         {
-            bool showMenu = true;
-            while (showMenu)
-            {
-                showMenu = MainMenu();
+            Console.Clear();
+            //Console.WriteLine("Choose an option:");
+            //Console.WriteLine("1) Reverse String");
+
+            //int currentLineCursor = Console.CursorTop;
+            //Console.WriteLine("currentLineCursor {0}", currentLineCursor);
+            //Console.SetCursorPosition(0, Console.CursorTop-3);
+            ////Console.Write(new string(' ', Console.WindowWidth));
+            ////Console.SetCursorPosition(0, currentLineCursor);
+            //Console.WriteLine("2) Remove Whitespace");
+            //Console.WriteLine("2) Remove Whitespace");
+
+
+            for (int i = 0; i < 15; i++) {
+
+                Console.WriteLine("Loop Index {0}:", i);
+                //int currentLineCursor = Console.CursorTop;
+                //Console.SetCursorPosition(0, Console.CursorTop - 1);
             }
+
+            Console.ReadKey();
+            //bool showMenu = true;
+            //while (showMenu)
+            //{
+            //    showMenu = MainMenu();
+            //}
         }
         private static bool MainMenu()
         {

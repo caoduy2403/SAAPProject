@@ -15,7 +15,7 @@ namespace SAAPHelper.Models
         
         public string Variable { get; set; }
         public string Message { get; set; }
-        public int LineCode { get; set; }
+        public string LineCode { get; set; }
         public string LineText { get; set; }
 
     }
@@ -54,5 +54,15 @@ namespace SAAPHelper.Models
 
         //[JsonProperty(PropertyName = "match")]
         //public string Match { get; set; }
+    }
+
+    public class ExportModel
+    {
+        public string listID { get; set; } = string.Empty;
+        public bool isBefore { get; set; } = true;
+        public bool isAfter { get; set; } = true;
+        public bool isCommented { get; set; } = true;
+        public bool isTranslatedFile { get; set; } = true;
+
     }
 }

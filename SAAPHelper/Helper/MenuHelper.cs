@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using SAAPHelper.Constant;
+using SAAPHelper.Models;
 
 namespace SAAPHelper.Helper
 {
@@ -28,82 +29,88 @@ namespace SAAPHelper.Helper
                 if (input == "1")
                 {
                     Console.WriteLine("\r\n===================================================================");
-                    Console.WriteLine("Selected:  1 ==> Export File");
+                    Console.WriteLine("Selected: 1. ==> Export File");
                     Console.WriteLine("========== Export with an option ==========");
                     Console.WriteLine("1. Before Name");
                     Console.WriteLine("2. After Name");
                     Console.WriteLine("3. Remove Comment (From After Name)");
-                    Console.WriteLine("4. After Name && Remove Comment");
+                    Console.WriteLine("4. Translate File");
                     Console.WriteLine("All Options\r\n");
 
                     Console.Write("\r\nOption: ");
                     string option = Console.ReadLine();
+                    Console.Write("List ID: ");
+                    string listID = Console.ReadLine();
 
                     bool isBefore = false;
                     bool isAfter = false;
                     bool isCommented = false;
-                    if (option == "1")
+                    bool isTranslatedFile = false;
+
+                    string[] listOption = option.Split(new Char[] {' ', ',', ';'});
+                    foreach (string opt in listOption)
                     {
-                        isBefore = true;
+                        if (opt == "1")
+                        {
+                            isBefore = true;
+                        }
+                        else if (opt == "2")
+                        {
+                            isAfter = true;
+                        }
+                        else if (opt == "3")
+                        {
+                            isCommented = true;
+                        }
+                        else if (opt == "4")
+                        {
+                            isTranslatedFile = true;
+                        }
                     }
-                    else if (option == "2")
-                    {
-                        isAfter = true;
-                    }
-                    else if (option == "3")
-                    {
-                        isCommented = true;
-                    }
-                    else if (option == "4")
-                    {
-                        isAfter = true;
-                        isCommented = true;
-                    }
-                    else
-                    {
-                        isBefore = true;
-                        isAfter = true;
-                        isCommented = true;
-                    }
-                    JapanFileHelper.ExportFile(isBefore, isAfter, isCommented);
+
+                    ExportModel model = new ExportModel();
+                    model.listID = listID;
+                    model.isBefore = isBefore;
+                    model.isAfter = isAfter;
+                    model.isCommented = isCommented;
+                    model.isTranslatedFile = isTranslatedFile;
+
+                    JapanFileHelper.ExportFile(model);
                 }
                 else if (input == "2") //Get Japanese Text From File"
                 {
                     Console.WriteLine("\r\n===================================================================");
-                    Console.WriteLine("Selected:  1 ==> Export File");
+                    Console.WriteLine("Selected: 1 ==> Export File");
                     Console.WriteLine("========== Translation Options ==========");
                     Console.WriteLine("1. Translation");
 
                     Console.Write("\r\n Option: ");
                     string option = Console.ReadLine();
-
                     bool isTranslated = false;
+
                     if (option == "1")
                     {
                         isTranslated = true;
                     }
-
                     JapanFileHelper.HandleJapaneseTextFile(isTranslated);
                 }
-                else if (input == "3")
+                else if (input == "3") //Convert File
                 {
                     Console.WriteLine("\r\n===================================================================");
-                    Console.WriteLine("Selected:  3. ==> Convert File");
+                    Console.WriteLine("Selected: 3. ==> Convert File");
                     JapanFileHelper.HandleConvertFile();
                 }
-                else if (input == "4")
+                else if (input == "4") //Delete File
                 {
                     Console.WriteLine("\r\n==================================================");
-                    Console.WriteLine("\r\nSelected:  4. ==> Delete File");
+                    Console.WriteLine("\r\nSelected: 4. ==> Delete File");
                     FolderHelper.DeleteAllFiles();
-
                 }
                 else if (input == "9")
                 {
                     Console.WriteLine("Good Bye");
                     Environment.Exit(0);
                 }
-
                 //DisplayResult();
             };
         }

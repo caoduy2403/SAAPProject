@@ -85,12 +85,24 @@ namespace SAAPHelper.Helper
                 int No = 1;
                 DateTime StartTime = DateTime.Now;
 
+                int countLine = fileContents.Count() - 1;
+
                 foreach (string line in fileContents)
                 {
                     LineCode++;
-                    //Console.WriteLine("[GetJapaneseTextFile] - [File Name] {0} [Line Code] #{1} [TimeSpan] {2}\n", filename, LineCode, (DateTime.Now - StartTime));
+                    Console.WriteLine("[GetJapaneseTextFile] - [File Name] {0} [Line Code] #{1} [TimeSpan] {2}\n", filename, LineCode, (DateTime.Now - StartTime));
+                    int currentLineCursor = Console.CursorTop;
+                  
+                    if (LineCode == countLine)
+                    {
+                        Console.SetCursorPosition(0, Console.CursorTop - 1);
+                    }
+                    else
+                    {
+                        Console.SetCursorPosition(0, Console.CursorTop - 2);
+                    }
 
-                    if(FuncHelper.chkTextIsNotCommented(line))
+                    if (FuncHelper.chkTextIsNotCommented(line))
                     {
                         string txtConvert = line;
 
@@ -118,9 +130,9 @@ namespace SAAPHelper.Helper
                                     sub_text = sub_text.Replace("\"", "");
 
                                     //check in database
-                                    bool isExisted = dtResult.AsEnumerable().Any(x => x.Field<string>("before_name").Trim() == sub_text);
+                                    bool isExisted = dtResult.AsEnumerable().Any(x => x.Field<string>("before_name") == sub_text);
 
-                                    if (rg.IsMatch(sub_text)) // && !isExisted
+                                    if (rg.IsMatch(sub_text) && !isExisted) // && !isExisted
                                     {
                                         //check in current file
                                         bool isExistedConversion = lstConversion.Any(x => x.Equals(sub_text));
@@ -144,15 +156,24 @@ namespace SAAPHelper.Helper
                                                 dataExcelModel.Variable = CharactersHelper.CapitalizeFirstLetterWithVarible(transText);
                                                 dataExcelModel.Message = CharactersHelper.CapitalizeFirstLetterWithMessage(transText);
                                             }
-                                         
+
                                             dataExcelModel.No = No;
                                             dataExcelModel.JA = sub_text;
                                             dataExcelModel.EN = transText;
                                             dataExcelModel.LineText = line;
-                                            dataExcelModel.LineCode = LineCode;
-                                           
+                                            dataExcelModel.LineCode = LineCode.ToString();
+
                                             dataExcel.Add(dataExcelModel);
                                             No++;
+                                        }
+                                        else 
+                                        {
+                                            var obj = dataExcel.FirstOrDefault(x => x.JA == sub_text);
+                                            if (obj != null)
+                                            {
+                                                obj.LineCode = obj.LineCode + "\r\n" + LineCode.ToString();
+                                                obj.LineText = obj.LineText + "\r\n" + line;
+                                            }
                                         }
                                     }
                                 }
@@ -193,7 +214,9 @@ namespace SAAPHelper.Helper
                 foreach (string line in fileContents)
                 {
                     LineCode++;
-                    //Console.WriteLine("[ConvertFile] - [File Name] {0} [Line Code] {1}\n", filename, LineCode);
+                    Console.WriteLine("[ConvertFile] - [File Name] {0} [Line Code] {1}\n", filename, LineCode);
+                    int currentLineCursor = Console.CursorTop;
+                    Console.SetCursorPosition(0, Console.CursorTop - 2);
 
                     string txtConvert = string.Empty;
                     txtConvert = line;
@@ -278,7 +301,6 @@ namespace SAAPHelper.Helper
                     writer.WriteLine(txtConvert);
                 }
             }
-
         }
 
         public static string GetConversionFileName(string id, string form_name,string file_name = "")
@@ -287,13 +309,18 @@ namespace SAAPHelper.Helper
             return result;
         }
 
-        public static void ExportFile(bool isBefore = true, bool isAfter = true, bool isCommented = true)
+        public static void ExportFile(ExportModel model)
         {
+            string listID = model.listID;
+            bool isBefore = model.isBefore;
+            bool isAfter = model.isAfter;
+            bool isCommented = model.isCommented;
+            bool isTranslatedFile = model.isTranslatedFile;
 
             DateTime StartTime = DateTime.Now;
-            Console.WriteLine("====================[ExportFile - START==================== [{0}] \n", StartTime.ToString("MM/dd/yyyy hh:mm:ss"));
+            Console.WriteLine("====================[ExportFile - START]==================== [{0}] \n", StartTime.ToString("MM/dd/yyyy hh:mm:ss"));
 
-            DataTable dtConversion = getSAAPConversion();
+            DataTable dtConversion = getSAAPConversion(listID);
 
             foreach (DataRow drConver in dtConversion.Rows)
             {
@@ -305,7 +332,6 @@ namespace SAAPHelper.Helper
                 string transText = TranslateHelper.TranslateText(form_name);
                 form_name = CharactersHelper.CapitalizeFirstLetter(transText);
 
-               
                 #region Before Name
                 //Before Name
                 if (isBefore)
@@ -325,7 +351,6 @@ namespace SAAPHelper.Helper
                         writerBeforeName.WriteLine(before_source);
                     }
                 }
-
                 #endregion
 
                 #region After Name
@@ -348,11 +373,9 @@ namespace SAAPHelper.Helper
                         writerAfterName.WriteLine(After_source);
                     }
                 }
-
                 #endregion
 
                 #region Replace Commented
-
                 //Replace Commented
                 if (isCommented)
                 {
@@ -422,15 +445,92 @@ namespace SAAPHelper.Helper
                             LineCode++;
                         }
                     }
-                } 
+                }
+
                 #endregion
+
+                #region Translate To English
+                if (isTranslatedFile)
+                {
+
+                    string transBeforeName = GetConversionFileName(id, form_name, Constants.ConvertName);
+                    string outTransBeforeName = Path.Combine(Constants.pathFolder, transBeforeName);
+
+                    //Console.WriteLine("[Translate To English] {0} \n", transBeforeName);
+                    if (File.Exists(outTransBeforeName))
+                    {
+                        File.Delete(outTransBeforeName);
+                    }
+
+                    // Create a Regex
+                    Regex rg = new Regex(Constants.pattern);
+
+                    string[] fileContents = before_source.Split(new string[] { Environment.NewLine, "\n" }, StringSplitOptions.None); ;
+                    string outFile = Path.Combine(Constants.pathFolder, outTransBeforeName);
+
+                    if (File.Exists(outFile))
+                    {
+                        File.Delete(outFile);
+                    }
+
+                    DataTable dtResult = GetANAMEConversion();
+                    using (StreamWriter writer = new StreamWriter(outFile))
+                    {
+                        int LineCode = 0;
+                        foreach (string line in fileContents)
+                        {
+                            LineCode++;
+                            Console.WriteLine("[ConvertFile] - [File Name] {0} [Line Code] #{1} [TimeSpan] = {2} \n", transBeforeName, LineCode, (DateTime.Now - StartTime));
+                            int currentLineCursor = Console.CursorTop;
+                            Console.SetCursorPosition(0, Console.CursorTop - 2);
+
+                            string txtConvert = string.Empty;
+                            txtConvert = line;
+
+                            if (FuncHelper.chkTextIsNotCommented(txtConvert))
+                            {
+                                int IdxCmt = FuncHelper.GetStartIdxCommented(line);
+                                string ConvertLast = string.Empty;
+
+                                if (IdxCmt > -1)
+                                {
+                                    ConvertLast = txtConvert.Substring(IdxCmt);
+                                    txtConvert = txtConvert.Substring(0, IdxCmt);
+                                }
+
+                                foreach (DataRow dr in dtResult.Rows)
+                                {
+                                    string before_name = dr["before_name"].ToString();
+                                    string after_name = dr["after_name"].ToString();
+
+                                    int idxSubtext = line.IndexOf(before_name); //StringComparison.OrdinalIgnoreCase
+
+                                    if ((IdxCmt == -1 || (IdxCmt > idxSubtext)) && idxSubtext > -1)
+                                    {
+                                        txtConvert = txtConvert.Replace(before_name, after_name);
+                                    }
+                                }
+
+                                if (!string.IsNullOrEmpty(ConvertLast))
+                                {
+                                    txtConvert = txtConvert + ConvertLast;
+                                }
+                            }
+
+                            writer.WriteLine(txtConvert);
+                        }
+                    }
+                }
+                #endregion
+
+                
             }
 
             DateTime EndTime = DateTime.Now;
             Console.WriteLine("====================[ExportFile - END]===================== [{0}] [{1}] ", EndTime.ToString("MM/dd/yyyy hh:mm:ss"), (DateTime.Now - StartTime));
         }
 
-        private static DataTable getSAAPConversion()
+        private static DataTable getSAAPConversion(string listID = "")
         {
             DataTable dtResult = new DataTable();
 
@@ -441,10 +541,16 @@ namespace SAAPHelper.Helper
             sql = sql + "       ,[After_source] ";
             sql = sql + " FROM [dbo].[ANAME_conversion] ";
             sql = sql + " Where ISnull(After_source,N'') != N'' ";
-            //sql = sql + " And [ID] IN (22) ";
+
+            if(!string.IsNullOrEmpty(listID))
+            {
+                string replaceStr = " And [ID] IN (@listID@) ";
+                replaceStr = replaceStr.Replace("@listID@", listID);
+                sql = sql + replaceStr;
+            }
+          
             //sql = sql + " And [ID] IN (1,2,3,4,5,8,9,10,12,13,14,15,16,17,18,19,20,21,23,24,25,26,27) ";
             sql = sql + " OrDer By [ID] ";
-
             dtResult = DbCommand.ExecuteDataTableWithCommand(sql);
 
             return dtResult;
