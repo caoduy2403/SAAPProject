@@ -10,8 +10,8 @@ namespace SAAPHelper.Constant
     {
         public const string pathFolder = "C:\\Users\\AZIP\\Desktop\\SAAPLibrary";
         public const string OutputName = "GetText";
-        public const string ConvertName = "Converted";
-        public const string CommentName = "Comment";
+        public const string ConvertName = "ConvertNoComment";
+        public const string CommentName = "NoComment"; //NoComment ReviewedCmt 
         /// <summary>
         /// regex to check japanese
         /// </summary>

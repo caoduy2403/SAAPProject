@@ -30,14 +30,13 @@ namespace SAAPHelper.Helper
                 {
                     Console.WriteLine("\r\n===================================================================");
                     Console.WriteLine("Selected: 1. ==> Export File");
-                    Console.WriteLine("========== Export with an option ==========");
+                    Console.WriteLine("========== Export with options ==========");
                     Console.WriteLine("1. Before Name");
                     Console.WriteLine("2. After Name");
                     Console.WriteLine("3. Remove Comment (From After Name)");
                     Console.WriteLine("4. Translate File");
-                    Console.WriteLine("All Options\r\n");
 
-                    Console.Write("\r\nOption: ");
+                    Console.Write("\r\nOptions: ");
                     string option = Console.ReadLine();
                     Console.Write("List ID: ");
                     string listID = Console.ReadLine();
@@ -68,6 +67,12 @@ namespace SAAPHelper.Helper
                         }
                     }
 
+                    if (!isBefore && !isAfter && !isCommented && !isTranslatedFile)
+                    {
+                        Console.WriteLine("Go to the Main Menu");
+                        continue;
+                    }
+
                     ExportModel model = new ExportModel();
                     model.listID = listID;
                     model.isBefore = isBefore;
@@ -86,12 +91,13 @@ namespace SAAPHelper.Helper
 
                     Console.Write("\r\n Option: ");
                     string option = Console.ReadLine();
-                    bool isTranslated = false;
 
+                    bool isTranslated = false;
                     if (option == "1")
                     {
                         isTranslated = true;
                     }
+
                     JapanFileHelper.HandleJapaneseTextFile(isTranslated);
                 }
                 else if (input == "3") //Convert File

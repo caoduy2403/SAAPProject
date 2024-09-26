@@ -147,9 +147,7 @@ namespace SAAPHelper.Helper
                                         string textExcel = sub_text + "\t@EXCEL@" + line;
                                         writer.WriteLine(textExcel);
 
-
                                         DataExcelModel dataExcelModel = new DataExcelModel();
-
 
                                         string transText = string.Empty;
                                         if (isTranslated)
@@ -455,21 +453,11 @@ namespace SAAPHelper.Helper
                 #region Translate To English
                 if (isTranslatedFile)
                 {
-
-                    string transBeforeName = GetConversionFileName(id, form_name, Constants.ConvertName);
-                    string outTransBeforeName = Path.Combine(Constants.pathFolder, transBeforeName);
-
-                    //Console.WriteLine("[Translate To English] {0} \n", transBeforeName);
-                    if (File.Exists(outTransBeforeName))
-                    {
-                        File.Delete(outTransBeforeName);
-                    }
-
                     // Create a Regex
                     Regex rg = new Regex(Constants.pattern);
-
-                    string[] fileContents = before_source.Split(new string[] { Environment.NewLine, "\n" }, StringSplitOptions.None); ;
-                    string outFile = Path.Combine(Constants.pathFolder, outTransBeforeName);
+                    string transBeforeName = GetConversionFileName(id, form_name, Constants.ConvertName);
+                    string[] fileContents = before_source.Split(new string[] { Environment.NewLine, "\n" }, StringSplitOptions.None);
+                    string outFile = Path.Combine(Constants.pathFolder, transBeforeName);
 
                     if (File.Exists(outFile))
                     {
@@ -480,12 +468,22 @@ namespace SAAPHelper.Helper
                     using (StreamWriter writer = new StreamWriter(outFile))
                     {
                         int LineCode = 0;
+                        int count = fileContents.Count() - 1;
                         foreach (string line in fileContents)
                         {
                             LineCode++;
                             Console.WriteLine("[ConvertFile] - [File Name] {0} [Line Code] #{1} [TimeSpan] = {2} \n", transBeforeName, LineCode, (DateTime.Now - StartTime));
                             int currentLineCursor = Console.CursorTop;
                             Console.SetCursorPosition(0, Console.CursorTop - 2);
+
+                            //if (LineCode == count)
+                            //{
+                            //    Console.SetCursorPosition(0, Console.CursorTop - 1);
+                            //}
+                            //else
+                            //{
+                            //    Console.SetCursorPosition(0, Console.CursorTop - 2);
+                            //}
 
                             string txtConvert = string.Empty;
                             txtConvert = line;

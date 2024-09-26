@@ -43,19 +43,27 @@ namespace SAAPHelper.Helper
         /// <returns></returns>
         public static DataTable ExecuteDataTableWithCommand(string sql)
         {
-            using (SqlConnection conn = new SqlConnection(_strConnection))
+            try
             {
-                conn.Open();
-
-                using (SqlDataAdapter da = new SqlDataAdapter(sql, conn))
+                using (SqlConnection conn = new SqlConnection(_strConnection))
                 {
-                    da.SelectCommand.CommandTimeout = 120;
-                    DataSet ds = new DataSet();
-                    da.Fill(ds);
+                    conn.Open();
 
-                    return ds.Tables[0];
+                    using (SqlDataAdapter da = new SqlDataAdapter(sql, conn))
+                    {
+                        da.SelectCommand.CommandTimeout = 120;
+                        DataSet ds = new DataSet();
+                        da.Fill(ds);
 
+                        return ds.Tables[0];
+
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("[DbCommand] [ExecuteDataTableWithCommand] [{0}]", ex.ToString());
+                return null;
             }
         }
 
